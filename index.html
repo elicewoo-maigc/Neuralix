@@ -1,0 +1,1039 @@
+
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1, viewport-fit=cover">
+<meta name="apple-mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+<meta name="theme-color" content="#000000">
+<title>Neuralix</title>
+
+<style>
+* {
+    box-sizing: border-box;
+    -webkit-tap-highlight-color: transparent;
+}
+
+html, body {
+    margin: 0;
+    padding: 0;
+    width: 100%;
+    height: 100%;
+    overflow: hidden;
+    background: #000;
+    color: #fff;
+    font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif;
+}
+
+button, input, select {
+    font: inherit;
+}
+
+#mainPage {
+    position: fixed;
+    inset: 0;
+    width: 100%;
+    height: 100%;
+    height: 100dvh;
+    background-color: #000;
+    background-size: contain;
+    background-position: center;
+    background-repeat: no-repeat;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    padding: 65px 20px 55px;
+}
+
+#gear {
+    position: absolute;
+    z-index: 10;
+    top: max(18px, env(safe-area-inset-top));
+    right: 18px;
+    width: 46px;
+    height: 46px;
+    border: 1px solid #444;
+    border-radius: 50%;
+    color: white;
+    background: rgba(30,30,30,.8);
+    font-size: 23px;
+    cursor: pointer;
+}
+
+#contentArea {
+    width: 100%;
+    max-width: 900px;
+    max-height: 85%;
+    overflow: auto;
+    text-align: center;
+    word-break: break-word;
+    white-space: pre-wrap;
+    font-size: var(--content-font-size, 65px);
+    color: var(--content-font-color, #ffffff);
+    line-height: 1.45;
+}
+
+#contentArea img {
+    display: block;
+    max-width: 100%;
+    max-height: 78vh;
+    object-fit: contain;
+    margin: auto;
+    border-radius: 8px;
+}
+
+#status {
+    position: absolute;
+    bottom: max(18px, env(safe-area-inset-bottom));
+    left: 0;
+    right: 0;
+    text-align: center;
+    color: rgba(255,255,255,.5);
+    font-size: 12px;
+    pointer-events: none;
+}
+
+#settingsPage {
+    position: fixed;
+    inset: 0;
+    z-index: 99999;
+    background: #101827;
+    display: none;
+    flex-direction: column;
+    overflow: hidden;
+    padding-top: env(safe-area-inset-top);
+    padding-bottom: env(safe-area-inset-bottom);
+}
+
+#settingsPage.show {
+    display: flex !important;
+}
+
+.settingsTop {
+    flex-shrink: 0;
+    height: 62px;
+    padding: 0 18px;
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    border-bottom: 1px solid #283449;
+}
+
+.settingsTop h2 {
+    font-size: 19px;
+    margin: 0;
+}
+
+.settingsTop button {
+    width: 38px;
+    height: 38px;
+    border: 0;
+    border-radius: 50%;
+    color: white;
+    background: #263449;
+    font-size: 22px;
+    cursor: pointer;
+}
+
+.settingsBody {
+    flex: 1;
+    overflow-y: auto;
+    padding: 18px;
+    padding-bottom: 40px;
+    -webkit-overflow-scrolling: touch;
+}
+
+.group {
+    margin-bottom: 18px;
+    padding: 17px;
+    border-radius: 13px;
+    background: #1b293d;
+}
+
+.group h3 {
+    margin: 0 0 15px;
+    font-size: 15px;
+    color: #8dbbff;
+}
+
+.field {
+    margin-bottom: 15px;
+}
+
+.field:last-child {
+    margin-bottom: 0;
+}
+
+.field label {
+    display: block;
+    font-size: 13px;
+    color: #b7c3d5;
+    margin-bottom: 8px;
+}
+
+.field input[type="text"],
+.field input[type="password"],
+.field input[type="number"],
+.field select {
+    width: 100%;
+    height: 43px;
+    padding: 0 12px;
+    border: 1px solid #394a63;
+    border-radius: 8px;
+    background: #111d2d;
+    color: white;
+    outline: none;
+    font-size: 14px;
+}
+
+.field input:focus,
+.field select:focus {
+    border-color: #4d9bff;
+}
+
+.field input[type="file"] {
+    width: 100%;
+    color: #cbd5e1;
+    font-size: 13px;
+}
+
+.field input[type="range"] {
+    width: 100%;
+    accent-color: #398cff;
+}
+
+.field input[type="color"] {
+    width: 100%;
+    height: 45px;
+    border: 1px solid #394a63;
+    border-radius: 8px;
+    background: #111d2d;
+    padding: 4px;
+    cursor: pointer;
+}
+
+.hint {
+    margin-top: 7px;
+    color: #8292a8;
+    font-size: 12px;
+    line-height: 1.6;
+}
+
+.switchLine {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    gap: 12px;
+    margin: 13px 0;
+    color: #dbe5f2;
+    font-size: 14px;
+}
+
+.switchLine input {
+    width: 21px;
+    height: 21px;
+    accent-color: #398cff;
+}
+
+.actionBtn {
+    width: 100%;
+    min-height: 46px;
+    border: 0;
+    border-radius: 9px;
+    background: #347ff0;
+    color: white;
+    font-weight: 600;
+    cursor: pointer;
+    margin-top: 8px;
+}
+
+.secondaryBtn {
+    background: #34445a;
+}
+
+#wallpaperPreview {
+    width: 100%;
+    max-height: 150px;
+    object-fit: contain;
+    display: none;
+    margin-top: 12px;
+    border-radius: 8px;
+    background: #000;
+}
+
+.previewText {
+    min-height: 55px;
+    padding: 12px;
+    background: #000;
+    border-radius: 8px;
+    text-align: center;
+    word-break: break-word;
+    overflow: hidden;
+    font-size: 28px;
+}
+
+#message {
+    position: fixed;
+    z-index: 100001;
+    left: 50%;
+    bottom: 25px;
+    transform: translateX(-50%);
+    padding: 11px 17px;
+    border-radius: 8px;
+    background: #27374d;
+    color: white;
+    font-size: 13px;
+    display: none;
+    max-width: 90%;
+    text-align: center;
+}
+
+@media (max-width: 600px) {
+    .settingsBody {
+        padding: 13px;
+    }
+
+    .group {
+        padding: 15px;
+    }
+}
+</style>
+</head>
+
+<body>
+
+<!-- 主界面 -->
+<main id="mainPage">
+    <button id="gear" type="button" aria-label="设置">⚙</button>
+    <div id="contentArea">等待接收内容...</div>
+    <div id="status">接收器已启动</div>
+</main>
+
+<!-- 设置页面 -->
+<section id="settingsPage">
+
+    <header class="settingsTop">
+        <h2>接收器设置</h2>
+        <button id="closeSettings" type="button">×</button>
+    </header>
+
+    <div class="settingsBody">
+
+        <!-- 云端接口 -->
+        <div class="group">
+            <h3>云端接口设置</h3>
+
+            <div class="field">
+                <label>API 地址</label>
+                <input id="apiUrl" type="text"
+                value="https://phonemagic-d7g6ftkkfab414b66-1406117790.ap-shanghai.app.tcloudbase.com/api/receive">
+            </div>
+
+            <div class="field">
+                <label>API 密钥（填写原始密钥）</label>
+                <input id="apiKey" type="password" placeholder="请输入原始 API Key">
+                <div class="hint">填写原始密钥，不要填写转换后的密钥。</div>
+            </div>
+
+            <button class="actionBtn secondaryBtn" id="testBtn" type="button">
+                测试连接
+            </button>
+        </div>
+
+        <!-- 自动接收 -->
+        <div class="group">
+            <h3>自动接收设置</h3>
+
+            <div class="field">
+                <label>检查间隔（秒）</label>
+                <input id="interval" type="number" min="2" max="60" value="3">
+                <div class="hint">建议设置为 3 秒。手机进入后台后，浏览器可能暂停轮询。</div>
+            </div>
+
+            <div class="switchLine">
+                <span>首次读取时自动跳转</span>
+                <input id="firstJump" type="checkbox">
+            </div>
+        </div>
+
+        <!-- 字体设置 -->
+        <div class="group">
+            <h3>字体显示设置</h3>
+
+            <div class="field">
+                <label>字体大小：<span id="fontSizeValue">65</span> px</label>
+                <input id="fontSize" type="range"
+                    min="16" max="120" step="1" value="65">
+            </div>
+
+            <div class="field">
+                <label>字体颜色</label>
+                <input id="fontColor" type="color" value="#ffffff">
+            </div>
+
+            <div class="field">
+                <label>效果预览</label>
+                <div class="previewText" id="fontPreview">
+                    内容预览 8888
+                </div>
+            </div>
+
+            <button class="actionBtn secondaryBtn" id="resetFont" type="button">
+                恢复默认字体设置
+            </button>
+        </div>
+
+        <!-- 自动跳转 -->
+        <div class="group">
+            <h3>自动跳转设置</h3>
+
+            <div class="switchLine">
+                <span>开启自动跳转</span>
+                <input id="autoJump" type="checkbox">
+            </div>
+
+            <div class="field">
+                <label>跳转 URL</label>
+                <input id="jumpUrl" type="text"
+                    placeholder="例如：mystersmith://?text=">
+                <div class="hint">
+                    支持 HTTPS 网页和快捷指令 URL Scheme。<br>
+                    使用 {text} 可指定内容插入位置。<br>
+                    URL 以 =、? 或 & 结尾时，直接追加接收内容。<br>
+                    其他情况自动追加 text 参数。
+                </div>
+            </div>
+
+            <button class="actionBtn secondaryBtn" id="testJumpBtn" type="button">
+                测试跳转
+            </button>
+        </div>
+
+        <!-- 壁纸 -->
+        <div class="group">
+            <h3>壁纸设置</h3>
+
+            <div class="field">
+                <label>上传自定义壁纸</label>
+                <input id="wallpaperFile" type="file" accept="image/*">
+                <img id="wallpaperPreview" alt="壁纸预览">
+            </div>
+
+            <div class="field">
+                <label>壁纸显示模式</label>
+                <select id="wallpaperMode">
+                    <option value="contain">完整显示（推荐，不裁剪）</option>
+                    <option value="cover">铺满屏幕（可能裁切边缘）</option>
+                    <option value="fill">拉伸铺满（可能变形）</option>
+                </select>
+            </div>
+
+            <button class="actionBtn secondaryBtn" id="removeWallpaper" type="button">
+                移除壁纸（恢复纯黑背景）
+            </button>
+        </div>
+
+        <button class="actionBtn" id="saveSettings" type="button">
+            保存设置
+        </button>
+
+        <button class="actionBtn secondaryBtn" id="manualRefresh" type="button">
+            立即获取最新内容
+        </button>
+
+    </div>
+</section>
+
+<div id="message"></div>
+
+<script>
+(function () {
+"use strict";
+
+var DEFAULT_API =
+"https://phonemagic-d7g6ftkkfab414b66-1406117790.ap-shanghai.app.tcloudbase.com/api/receive";
+
+var timer = null;
+var lastSignature = "";
+var currentContent = "";
+var isFirstFetch = true;
+var isFetching = false;
+
+function $(id) {
+    return document.getElementById(id);
+}
+
+/* 提示 */
+function toast(text) {
+    var box = $("message");
+    box.textContent = text;
+    box.style.display = "block";
+
+    clearTimeout(toast.timer);
+    toast.timer = setTimeout(function () {
+        box.style.display = "none";
+    }, 2500);
+}
+
+/* 设置页面 */
+function openSettings() {
+    $("settingsPage").style.display = "flex";
+    $("settingsPage").classList.add("show");
+}
+
+function closeSettings() {
+    $("settingsPage").classList.remove("show");
+    $("settingsPage").style.display = "none";
+}
+
+$("gear").addEventListener("click", function (e) {
+    e.preventDefault();
+    openSettings();
+});
+
+$("closeSettings").addEventListener("click", closeSettings);
+
+/* 字体和壁纸显示设置 */
+function applyDisplaySettings() {
+    var size = Number($("fontSize").value) || 65;
+    var color = $("fontColor").value || "#ffffff";
+    var mode = $("wallpaperMode").value || "contain";
+
+    document.documentElement.style.setProperty(
+        "--content-font-size",
+        size + "px"
+    );
+
+    document.documentElement.style.setProperty(
+        "--content-font-color",
+        color
+    );
+
+    $("fontSizeValue").textContent = size;
+
+    $("fontPreview").style.fontSize =
+        Math.min(size, 55) + "px";
+
+    $("fontPreview").style.color = color;
+
+    $("mainPage").style.backgroundSize =
+        mode === "fill" ? "100% 100%" : mode;
+
+    $("mainPage").style.backgroundPosition = "center";
+    $("mainPage").style.backgroundRepeat = "no-repeat";
+}
+
+$("fontSize").addEventListener("input", applyDisplaySettings);
+$("fontColor").addEventListener("input", applyDisplaySettings);
+$("wallpaperMode").addEventListener("change", applyDisplaySettings);
+
+$("resetFont").addEventListener("click", function () {
+    $("fontSize").value = 65;
+    $("fontColor").value = "#ffffff";
+    applyDisplaySettings();
+    toast("字体已恢复默认");
+});
+
+/* 读取设置 */
+function loadSettings() {
+    var saved = {};
+
+    try {
+        saved = JSON.parse(
+            localStorage.getItem("receiverSettings") || "{}"
+        );
+    } catch (e) {
+        saved = {};
+    }
+
+    $("apiUrl").value = saved.apiUrl || DEFAULT_API;
+    $("apiKey").value = saved.apiKey || "";
+    $("interval").value = saved.interval || 3;
+
+    $("autoJump").checked = !!saved.autoJump;
+    $("firstJump").checked = !!saved.firstJump;
+    $("jumpUrl").value = saved.jumpUrl || "";
+
+    $("fontSize").value = saved.fontSize || 65;
+    $("fontColor").value = saved.fontColor || "#ffffff";
+    $("wallpaperMode").value = saved.wallpaperMode || "contain";
+
+    applyDisplaySettings();
+}
+
+function getSettings() {
+    try {
+        return JSON.parse(
+            localStorage.getItem("receiverSettings") || "{}"
+        );
+    } catch (e) {
+        return {};
+    }
+}
+
+/* 保存设置 */
+function saveSettings(showMessage) {
+    var interval = Math.min(
+        60,
+        Math.max(2, Number($("interval").value) || 3)
+    );
+
+    $("interval").value = interval;
+
+    var settings = {
+        apiUrl: $("apiUrl").value.trim(),
+        apiKey: $("apiKey").value.trim(),
+        interval: interval,
+        autoJump: $("autoJump").checked,
+        firstJump: $("firstJump").checked,
+        jumpUrl: $("jumpUrl").value.trim(),
+        fontSize: Number($("fontSize").value),
+        fontColor: $("fontColor").value,
+        wallpaperMode: $("wallpaperMode").value
+    };
+
+    try {
+        localStorage.setItem(
+            "receiverSettings",
+            JSON.stringify(settings)
+        );
+    } catch (e) {
+        toast("设置保存失败，请检查浏览器存储权限");
+        return false;
+    }
+
+    applyDisplaySettings();
+    restartPolling();
+
+    if (showMessage) {
+        toast("设置已保存");
+        closeSettings();
+    }
+
+    return true;
+}
+
+/* 壁纸数据库 */
+function openDB() {
+    return new Promise(function (resolve, reject) {
+        if (!window.indexedDB) {
+            reject(new Error("浏览器不支持本地图片存储"));
+            return;
+        }
+
+        var request = indexedDB.open("ContentReceiverDB", 1);
+
+        request.onupgradeneeded = function () {
+            var db = request.result;
+
+            if (!db.objectStoreNames.contains("settings")) {
+                db.createObjectStore("settings");
+            }
+        };
+
+        request.onsuccess = function () {
+            resolve(request.result);
+        };
+
+        request.onerror = function () {
+            reject(request.error);
+        };
+    });
+}
+
+function saveWallpaper(data) {
+    return openDB().then(function (db) {
+        return new Promise(function (resolve, reject) {
+            var tx = db.transaction("settings", "readwrite");
+            tx.objectStore("settings").put(data, "wallpaper");
+
+            tx.oncomplete = function () {
+                db.close();
+                resolve();
+            };
+
+            tx.onerror = function () {
+                db.close();
+                reject(tx.error);
+            };
+        });
+    });
+}
+
+function readWallpaper() {
+    return openDB().then(function (db) {
+        return new Promise(function (resolve, reject) {
+            var tx = db.transaction("settings", "readonly");
+            var request = tx.objectStore("settings").get("wallpaper");
+
+            request.onsuccess = function () {
+                var result = request.result || "";
+                db.close();
+                resolve(result);
+            };
+
+            request.onerror = function () {
+                db.close();
+                reject(request.error);
+            };
+        });
+    });
+}
+
+function deleteWallpaper() {
+    return openDB().then(function (db) {
+        return new Promise(function (resolve, reject) {
+            var tx = db.transaction("settings", "readwrite");
+            tx.objectStore("settings").delete("wallpaper");
+
+            tx.oncomplete = function () {
+                db.close();
+                resolve();
+            };
+
+            tx.onerror = function () {
+                db.close();
+                reject(tx.error);
+            };
+        });
+    });
+}
+
+function applyWallpaper(data) {
+    if (data) {
+        $("mainPage").style.backgroundImage =
+            'url("' + data + '")';
+
+        $("wallpaperPreview").src = data;
+        $("wallpaperPreview").style.display = "block";
+    } else {
+        $("mainPage").style.backgroundImage = "none";
+        $("mainPage").style.backgroundColor = "#000";
+        $("wallpaperPreview").style.display = "none";
+    }
+
+    applyDisplaySettings();
+}
+
+/* 上传壁纸 */
+$("wallpaperFile").addEventListener("change", function () {
+    var file = this.files && this.files[0];
+
+    if (!file) return;
+
+    if (!file.type || file.type.indexOf("image/") !== 0) {
+        toast("请选择图片文件");
+        return;
+    }
+
+    if (file.size > 8 * 1024 * 1024) {
+        toast("图片不能超过 8MB");
+        return;
+    }
+
+    var reader = new FileReader();
+
+    reader.onload = function () {
+        saveWallpaper(reader.result).then(function () {
+            applyWallpaper(reader.result);
+            toast("壁纸保存成功");
+        }).catch(function (e) {
+            console.error(e);
+            toast("壁纸保存失败");
+        });
+    };
+
+    reader.onerror = function () {
+        toast("图片读取失败");
+    };
+
+    reader.readAsDataURL(file);
+});
+
+/* 移除壁纸 */
+$("removeWallpaper").addEventListener("click", function () {
+    deleteWallpaper().then(function () {
+        applyWallpaper("");
+        $("wallpaperFile").value = "";
+        toast("已恢复纯黑背景");
+    }).catch(function (e) {
+        console.error(e);
+        toast("移除失败");
+    });
+});
+
+/* 跳转 URL */
+function buildJumpUrl(content) {
+    var settings = getSettings();
+    var url = settings.jumpUrl || "";
+    var encoded = encodeURIComponent(content);
+
+    if (!url) {
+        throw new Error("请先填写跳转 URL");
+    }
+
+    if (url.indexOf("{text}") !== -1) {
+        return url.split("{text}").join(encoded);
+    }
+
+    if (/[=?&]$/.test(url)) {
+        return url + encoded;
+    }
+
+    return url + (url.indexOf("?") !== -1 ? "&" : "?")
+        + "text=" + encoded;
+}
+
+function doJump(content) {
+    try {
+        window.location.href = buildJumpUrl(content);
+        return true;
+    } catch (e) {
+        toast(e.message || "跳转失败");
+        return false;
+    }
+}
+
+$("testJumpBtn").addEventListener("click", function () {
+    var settings = getSettings();
+
+    if (!settings.jumpUrl) {
+        toast("请先填写跳转 URL 并保存设置");
+        return;
+    }
+
+    doJump(currentContent || "测试内容123");
+});
+
+/* 图片识别 */
+function isImageUrl(value) {
+    return /^data:image\//i.test(value) ||
+        /\.(png|jpe?g|gif|webp|bmp|svg)(\?.*)?$/i.test(value) ||
+        /[?&]format=(png|jpe?g|gif|webp)/i.test(value);
+}
+
+/* 显示内容 */
+function renderContent(data) {
+    var area = $("contentArea");
+
+    var content = data && data.content != null
+        ? String(data.content)
+        : "";
+
+    currentContent = content;
+    area.replaceChildren();
+
+    if (!content) {
+        area.textContent = "收到空内容";
+        return;
+    }
+
+    if (/^data:image\//i.test(content) ||
+        (/^https?:\/\//i.test(content) && isImageUrl(content))) {
+
+        var img = document.createElement("img");
+        img.src = content;
+        img.alt = "接收到的图片";
+
+        img.onerror = function () {
+            area.textContent = content;
+        };
+
+        area.appendChild(img);
+    } else {
+        area.textContent = content;
+    }
+}
+
+/* 内容变化检测 */
+function makeSignature(data) {
+    return JSON.stringify({
+        content: data.content == null ? "" : data.content,
+        source: data.source || "",
+        type: data.type || "",
+        createdAt: data.createdAt || ""
+    });
+}
+
+/* 获取接口内容 */
+function fetchContent(manual) {
+    if (isFetching) return;
+
+    var settings = getSettings();
+
+    if (!settings.apiUrl || !settings.apiKey) {
+        $("status").textContent = "请点击右上角设置，填写 API 密钥";
+        if (manual) toast("请先填写 API 密钥");
+        return;
+    }
+
+    isFetching = true;
+
+    fetch(settings.apiUrl, {
+        method: "GET",
+        headers: {
+            "X-API-Key": settings.apiKey,
+            "Accept": "application/json"
+        },
+        cache: "no-store"
+    })
+    .then(function (response) {
+        if (!response.ok) {
+            throw new Error("HTTP " + response.status);
+        }
+
+        return response.json();
+    })
+    .then(function (result) {
+        if (!result.success) {
+            throw new Error(result.message || "接口读取失败");
+        }
+
+        /* 读取第一条记录，不筛选任何用户 ID */
+        var records = Array.isArray(result.data)
+            ? result.data
+            : [];
+
+        if (records.length === 0 || !records[0].data) {
+            $("status").textContent = "连接成功，暂时没有内容";
+            if (manual) toast("连接成功，但数据数组为空");
+            isFirstFetch = false;
+            return;
+        }
+
+        var receivedData = records[0].data;
+
+        if (typeof receivedData !== "object" ||
+            receivedData.content == null) {
+            $("status").textContent = "数据格式不正确";
+            if (manual) toast("未找到 content 内容");
+            isFirstFetch = false;
+            return;
+        }
+
+        var signature = makeSignature(receivedData);
+
+        if (signature !== lastSignature) {
+            lastSignature = signature;
+
+            renderContent(receivedData);
+
+            $("status").textContent = "已接收 · " +
+                (receivedData.createdAt
+                    ? new Date(receivedData.createdAt).toLocaleString()
+                    : "最新内容");
+
+            var shouldJump =
+                settings.autoJump &&
+                (!isFirstFetch || settings.firstJump);
+
+            isFirstFetch = false;
+
+            if (shouldJump &&
+                String(receivedData.content) !== "") {
+                doJump(String(receivedData.content));
+            }
+
+            if (manual) toast("已获取最新内容");
+
+        } else {
+            $("status").textContent = "已连接 · 等待新内容";
+            isFirstFetch = false;
+
+            if (manual) toast("内容没有变化");
+        }
+    })
+    .catch(function (error) {
+        console.error("接收失败：", error);
+
+        $("status").textContent = "连接失败：" + error.message;
+
+        if (manual) {
+            toast("连接失败：" + error.message);
+        }
+    })
+    .then(function () {
+        isFetching = false;
+    });
+}
+
+/* 自动轮询 */
+function restartPolling() {
+    if (timer) {
+        clearInterval(timer);
+        timer = null;
+    }
+
+    var settings = getSettings();
+
+    var interval = Math.min(
+        60,
+        Math.max(2, Number(settings.interval) || 3)
+    );
+
+    fetchContent(false);
+
+    timer = setInterval(function () {
+        fetchContent(false);
+    }, interval * 1000);
+}
+
+/* 测试连接 */
+$("testBtn").addEventListener("click", function () {
+    if (saveSettings(false)) {
+        fetchContent(true);
+    }
+});
+
+/* 保存设置 */
+$("saveSettings").addEventListener("click", function () {
+    saveSettings(true);
+});
+
+/* 手动刷新 */
+$("manualRefresh").addEventListener("click", function () {
+    fetchContent(true);
+});
+
+/* 返回前台时刷新 */
+document.addEventListener("visibilitychange", function () {
+    if (!document.hidden) {
+        fetchContent(false);
+    }
+});
+
+window.addEventListener("pageshow", function () {
+    fetchContent(false);
+});
+
+/* 初始化 */
+function init() {
+    try {
+        loadSettings();
+    } catch (e) {
+        console.error("设置读取失败", e);
+    }
+
+    readWallpaper().then(function (wallpaper) {
+        applyWallpaper(wallpaper);
+    }).catch(function (e) {
+        console.warn("壁纸读取失败", e);
+        applyWallpaper("");
+    });
+
+    restartPolling();
+}
+
+try {
+    init();
+} catch (e) {
+    console.error("初始化失败", e);
+    $("status").textContent = "初始化失败，请检查浏览器控制台";
+}
+
+})();
+</script>
+
+</body>
+</html>
